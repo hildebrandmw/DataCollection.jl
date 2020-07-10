@@ -1,9 +1,17 @@
 name = "DataCollection"
-uuid = "2bd17bf8-27a5-4708-bb2c-446e8f08240e"
-authors = ["Mark Hildebrand <mhildebrand@ucdavis.edu> and contributors"]
+uuid = "8a2d3c17-6bbe-4bd6-a041-217f42a28f9a"
+authors = ["Mark Hildebrand <mhildebrand@ucdavis.edu>"]
 version = "0.1.0"
 
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
 [compat]
+DataFrames = "0.21.0"
+DataStructures = "0.17.18"
 julia = "1"
 
 [extras]
