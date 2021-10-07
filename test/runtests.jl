@@ -84,7 +84,7 @@ end
     # Add something with different parameters.
     # Make sure we get an error if we don't pass `cols = :union`
     z = ParametersC(1,2)
-    @test_throws KeyError addrow!(df, d, z)
+    @test_throws ArgumentError addrow!(df, d, z)
     addrow!(df, d, z; cols = :union)
 
     @test nrow(df) == 3
@@ -95,48 +95,3 @@ end
     @test DataCollection.hasrow(df, z)
 end
 
-#####
-##### MeasurementBundle
-#####
-
-struct TestMeasurement
-    name::Symbol
-    values
-end
-
-function Base.iterate(t::TestMeasurement, s = iterate(t.values))
-    isnothing(s) && return nothing
-
-    res = NamedTuple{(t.name,)}((s[1],))
-    return res, iterate(t.values, s[2])
-end
-
-@testset "Testing MeasurementBundle" begin
-    tm1 = TestMeasurement(:test_1, [1,2,3])
-    tm2 = TestMeasurement(:test_2, [:a,:b])
-
-    bundle = DataCollection.MeasurementBundle(
-        (tm1, tm2),
-        (pre = "hello",),
-        (post = "bye",)
-    )
-
-    # First iteration
-    s = iterate(bundle)
-    @test !isnothing(s)
-    @test s[1] == (pre = "hello", test_1 = 1, test_2 = :a, post = "bye")
-
-    # Next iteration - should step through tm1 and tm2
-    s = iterate(bundle, s[2])
-    @test !isnothing(s)
-    @test s[1] == (pre = "hello", test_1 = 2, test_2 = :b, post = "bye")
-
-    # Now, tm2 should ge be dropped
-    s = iterate(bundle, s[2])
-    @test !isnothing(s)
-    @test s[1] == (pre = "hello", test_1 = 3, post = "bye")
-
-    # Final iteration, should just get nothing now
-    s = iterate(bundle, s[2])
-    @test isnothing(s)
-end
