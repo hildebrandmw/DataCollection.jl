@@ -32,23 +32,27 @@ paramexclude(x::Bundle) = kwexclude(x)
 #####
 
 namesof(::NamedTuple{names}) where {names} = names
-
-struct GenericParameters{names,T} <: AbstractParameters
+struct Parameters{names,T} <: AbstractParameters
     nt::NamedTuple{names,T}
 end
-GenericParameters(; kw...) = GenericParameters((; kw...))
+Parameters(; kw...) = Parameters((; kw...))
+const GenericParameters = Parameters
 
-struct GenericData{names,T} <: AbstractData
+struct Data{names,T} <: AbstractData
     nt::NamedTuple{names,T}
 end
-GenericData(; kw...) = GenericData((; kw...))
+Data(; kw...) = Data((; kw...))
+const GenericData = Data
 
-Base.propertynames(x::Union{GenericParameters,GenericData}) = namesof(x.nt)
-function Base.getproperty(x::Union{GenericParameters,GenericData}, s::Symbol)
+Base.propertynames(x::Union{Parameters,Data}) = namesof(x.nt)
+function Base.getproperty(x::Union{Parameters,Data}, s::Symbol)
     nt = getfield(x, :nt)
     s == :nt && return nt
     return nt[s]
 end
+
+Base.merge(a::Parameters, b::Parameters) = Parameters(merge(a.nt, b.nt))
+Base.merge(a::Data, b::Data) = Data(merge(a.nt, b.nt))
 
 # DataFrame hooks
 combine_error(a, b) = error("Found duplicate keys! Values are `$a` and `$b`.")
@@ -74,7 +78,6 @@ function addrow!(
     cols = :setequal,
     force = false,
 )
-
     # if the datacrame is empty, then we want to set `cols` to `:union` in order
     # to bootstrap DataFrame creation
     d = dict(x...)
