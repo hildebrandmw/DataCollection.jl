@@ -1,6 +1,6 @@
 module DataCollection
 
-export AbstractParameters, AbstractData, addrow!, tokw
+export AbstractParameters, AbstractData, Parameters, Data, addrow!, tokw
 
 # stdlib
 using Dates
@@ -76,6 +76,7 @@ function addrow!(
     y::AbstractData,
     x::Union{AbstractParameters,<:AbstractDict}...;
     cols = :setequal,
+    sanitizer = (_...) -> nothing,
     force = false,
 )
     # if the datacrame is empty, then we want to set `cols` to `:union` in order
@@ -96,7 +97,9 @@ function addrow!(
     end
 
     cols = isempty(df) ? :union : cols
-    return push!(df, merge(timestamp(), dict(y, d)); promote = true, cols = cols)
+    newrow = merge(timestamp(), dict(y, d))
+    sanitizer(newrow)
+    return push!(df, newrow; promote = true, cols = cols)
 end
 
 # Utilities for searching for existing entries.
