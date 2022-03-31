@@ -41,10 +41,10 @@ end
         :c => 3,
         :d => 4,
     )
-    @test DataCollection.dict(x,y) == expected
+    @test DataCollection._lower(x,y) == expected
 
     z = ParametersError(5,6)
-    @test_throws ErrorException DataCollection.dict(x,y,z)
+    @test_throws ErrorException DataCollection._lower(x,y,z)
 
     # DataFrames schenanigans
     df = DataFrame()

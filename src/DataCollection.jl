@@ -56,13 +56,11 @@ Base.merge(a::Data, b::Data) = Data(merge(a.nt, b.nt))
 
 # DataFrame hooks
 combine_error(a, b) = error("Found duplicate keys! Values are `$a` and `$b`.")
-dict(x::AbstractDict) = x
 function dict(x::Bundle)
     return SortedDict(
         k => lower(getproperty(x, k)) for k in propertynames(x) if !in(k, paramexclude(x))
     )
 end
-dict(x...) = merge(combine_error, map(dict, x)...)
 lower(x::Bundle) = dict(x)
 
 # Support for turning parameters into a collection of keyword arguments
@@ -71,6 +69,8 @@ function tokw(x::Bundle)
 end
 
 timestamp() = SortedDict(:timestamp => now())
+
+_lower(x...) = merge(combine_error, map(lower, x)...)
 function addrow!(
     df::DataFrame,
     y::AbstractData,
@@ -81,7 +81,7 @@ function addrow!(
 )
     # if the datacrame is empty, then we want to set `cols` to `:union` in order
     # to bootstrap DataFrame creation
-    d = dict(x...)
+    d = _lower(x...)
     row = findrow(df, d)
 
     # If a row for these parameters already exists, check if we're forcing update.
@@ -97,7 +97,7 @@ function addrow!(
     end
 
     cols = isempty(df) ? :union : cols
-    newrow = merge(timestamp(), dict(y, d))
+    newrow = _lower(timestamp(), y, d)
     sanitizer(newrow)
     return push!(df, newrow; promote = true, cols = cols)
 end
@@ -107,7 +107,7 @@ struct RowSearch{T}
     dict::T
 end
 
-RowSearch(x::AbstractParameters...) = RowSearch(dict(x...))
+RowSearch(x::AbstractParameters...) = RowSearch(_lower(x...))
 
 # Treat `missing` as falses.
 unmissing(x::Bool) = x
@@ -119,7 +119,7 @@ function (R::RowSearch)(x)
     return all(pred, R.dict)
 end
 
-findrow(df::DataFrame, x::AbstractParameters...) = findrow(df, dict(x...))
+findrow(df::DataFrame, x::AbstractParameters...) = findrow(df, _lower(x...))
 findrow(df::DataFrame, x::AbstractDict) = findrow(df, RowSearch(x))
 function findrow(df::DataFrame, f::RowSearch)
     for (i, row) in enumerate(eachrow(df))
