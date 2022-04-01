@@ -102,6 +102,18 @@ function addrow!(
     return push!(df, newrow; promote = true, cols = cols)
 end
 
+function addrow!(
+    savefile::AbstractString,
+    y::AbstractData,
+    x::Union{AbstractParameters,<:AbstractDict}...;
+    kw...,
+)
+    df = load(savefile)
+    addrow!(df, y, x...; kw...)
+    save(df, savefile)
+    return df
+end
+
 # Utilities for searching for existing entries.
 struct RowSearch{T}
     dict::T
