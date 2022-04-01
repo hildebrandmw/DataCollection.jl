@@ -76,7 +76,7 @@ function addrow!(
     y::AbstractData,
     x::Union{AbstractParameters,<:AbstractDict}...;
     cols = :setequal,
-    sanitizer = (_...) -> nothing,
+    sanitizer = Returns(nothing),
     force = false,
 )
     # if the datacrame is empty, then we want to set `cols` to `:union` in order

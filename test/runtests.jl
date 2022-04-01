@@ -1,9 +1,22 @@
 using DataCollection
 using Test
 
-# For checking behavior
 using DataFrames
 import DataStructures: SortedDict
+
+#####
+##### Test behavior of `lower`.
+#####
+
+@testset "Testing Helper Functions" begin
+    @test DataCollection.lower(1) === 1
+
+    # Functions
+    @test DataCollection.lower(identity) == "identity"
+    @test DataCollection.lower(cos) == "cos"
+    @test DataCollection.lower([1,2,3]) == [1,2,3]
+    @test DataCollection.lower([1, identity, cos, 4]) == [1, "identity", "cos", 4]
+end
 
 struct ParametersA <: AbstractParameters
     a::Int
@@ -32,6 +45,7 @@ end
 
 @testset "Testing Parameters" begin
     x = ParametersA(1,2)
+    @test DataCollection.lower(x) == SortedDict(:a => 1, :b => 2)
     @test DataCollection.dict(x) == SortedDict(:a => 1, :b => 2)
 
     y = ParametersB(3,4)
