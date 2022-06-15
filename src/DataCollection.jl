@@ -51,8 +51,9 @@ function Base.getproperty(x::Union{Parameters,Data}, s::Symbol)
     return nt[s]
 end
 
-Base.merge(a::Parameters, b::Parameters) = Parameters(merge(a.nt, b.nt))
-Base.merge(a::Data, b::Data) = Data(merge(a.nt, b.nt))
+getnt(a::Union{Parameters,Data}) = a.nt
+Base.merge(a::Parameters, b::Parameters...) = Parameters(merge(getnt(a), getnt.(b)...))
+Base.merge(a::Data, b::Data...) = Data(merge(getnt(a), getnt.(b)...))
 
 # DataFrame hooks
 combine_error(a, b) = error("Found duplicate keys! Values are `$a` and `$b`.")
@@ -127,7 +128,7 @@ unmissing(x::Missing) = false
 
 function (R::RowSearch)(x)
     pred =
-        kv -> hasproperty(x, first(kv)) && unmissing(getproperty(x, first(kv)) == last(kv))
+        kv -> haskey(x, first(kv)) && unmissing(getindex(x, first(kv)) == last(kv))
     return all(pred, R.dict)
 end
 
